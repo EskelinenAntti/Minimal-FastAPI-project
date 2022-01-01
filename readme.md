@@ -32,25 +32,21 @@ async def get_notes(session: Session = Depends(db.get_session)) -> NoteOut:
 
 The `Depends(db.get_session)` dependency creates the session and closes it automatically on each request.
 
-### Pydantic In and Out schemas
+### Abstract base schema and model with id, created_at and updated_at fields
 
-Below we have an example endpoint that allows creating new notes:
+The project contains an SQLAlchemy base model model with id, created_at and updated_at fields. When a new instance is created or
+updated those values are updated automatically in the backend side.
 
 ```python
-@router.post("/", response_model=NoteOut)
-async def create_note(payload: NoteIn, session: Session = Depends(db.get_session)) -> NoteOut:
-    # store payload in database and return result 
-    # code truncated
-    return note
+class BaseModel(Base):
+    __abstract__ = True
+
+    id = Column(Integer, primary_key=True, index=True)
+    created_at = Column(DateTime, default=func.now())
+    updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
 ```
 
-Notice that the endpoint takes `NoteIn` as request payload and returns `NoteOut`. `NoteIn` contains only the fields that
-users can define. `NoteOut` contains in addition the fields whose values are set by the backend, such as `id`.
-
-In this project, the `BaseReadSchema` in `app/schemas/core` can be inherited to define a read only
-schema. `BaseReadSchema` defines common read only field values. In addition, it contains the `orm_mode = True`
-configuration, which makes it possible to create an instance of the schema from an ORM object.
-
+Correspondingly, `BaseReadSchema` can be inherited when those values are needed in a Pydantic schema.
 ```python
 class BaseReadSchema(BaseModel):
     id: int
@@ -61,32 +57,6 @@ class BaseReadSchema(BaseModel):
         orm_mode = True
 ```
 
-This makes it possible to define the "In" and "Out" schemas with little duplicate code.
-
-```python
-class NoteBase(BaseModel):
-    note: str
-
-
-class NoteOut(BaseReadSchema, NoteBase):
-    ...
-
-
-class NoteIn(NoteBase):
-    ...
-```
-
-Or, if the `in` and the `base` schemas are identical like in the example above, we can go even further and define those
-as:
-
-```python
-class NoteIn(BaseModel):
-    note: str
-
-
-class NoteOut(BaseReadSchema, NoteIn):
-    ...
-```
 
 ### Structure
 
