@@ -8,7 +8,7 @@ This project contains a minimal setup for the following components:
 
 The project is done for learning and research purposes.
 
-## Running:
+## Run the project
 
 Install FastAPI from PIP and run the project with
 `uvicorn app.main:app --reload`
@@ -25,8 +25,8 @@ Database related configurations and setup code is encapsulated in `db.py`. The f
 obtain a database session in an API router:
 
 ```python
-@router.get("/", response_model=list[Note])
-async def get_notes(session: Session = Depends(db.get_session)):
+@router.get("/", response_model=list[NoteOut])
+async def get_notes(session: Session = Depends(db.get_session)) -> NoteOut:
     return session.query(models.Note).all()
 ```
 
