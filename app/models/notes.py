@@ -1,10 +1,8 @@
-from sqlalchemy import Column, String, Integer
+from sqlalchemy import Column, String
+from app.models.core import BaseModel
 
-from app.db import Base
 
-
-class Note(Base):
+class Note(BaseModel):
     __tablename__ = "notes"
 
-    id = Column(Integer, primary_key=True, index=True)
     note = Column(String)
