@@ -13,5 +13,3 @@ db.create_tables()
 
 app = FastAPI()
 app.include_router(notes.router, prefix="/notes")
-
-

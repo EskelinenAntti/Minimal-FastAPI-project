@@ -18,41 +18,33 @@ Install FastAPI from PIP and run the project with
 ### Database configuration
 
 Database related configurations and setup code is encapsulated in `db.py`. The following snippet demonstrates how to
-obtain a database session in an API router:
+obtain a database session:
+
+```python
+def _get_repository(session: Session = Depends(get_session)):
+    return Repository(model, session)
+```
+
+The `Depends(db.get_session)` dependency creates the session and closes it automatically once its no longer needed.
+
+### Generic repository
+
+Similarly, the project contains a generic repository with basic CRUD operations. The repository can be accessed using
+FastAPI's dependency injection:
 
 ```python
 @router.get("/", response_model=list[NoteOut])
-async def get_notes(session: Session = Depends(db.get_session)) -> NoteOut:
-    return session.query(models.Note).all()
+async def get_notes(notes: Repository = Depends(Repository.get_repository(Note))):
+    return notes.all()
 ```
 
-The `Depends(db.get_session)` dependency creates the session and closes it automatically on each request.
+### Mypy
 
-### Abstract base schema and model with id, created_at and updated_at fields
+Mypy plugin has been configured to work with SQLAlchemy code.
 
-The project contains an SQLAlchemy base model model with id, created_at and updated_at fields. When a new instance is created or
-updated those values are updated automatically in the backend side.
-
-```python
-class BaseModel(Base):
-    __abstract__ = True
-
-    id = Column(Integer, primary_key=True, index=True)
-    created_at = Column(DateTime, default=func.now())
-    updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
-```
-
-Correspondingly, `BaseReadSchema` can be inherited when those values are needed in a Pydantic schema.
-```python
-class BaseReadSchema(BaseModel):
-    id: int
-    created_at: datetime
-    updated_at: datetime
-
-    class Config:
-        orm_mode = True
-```
-
+1. Installed stubs with `pip install sqlalchemy[mypy]`
+2. Configured mypy plugin to `mypy.ini`
+3. Ran mypy with `mypy .`
 
 ### Structure
 
