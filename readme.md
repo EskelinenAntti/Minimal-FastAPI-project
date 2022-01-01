@@ -13,10 +13,6 @@ The project is done for learning and research purposes.
 Install FastAPI from PIP and run the project with
 `uvicorn app.main:app --reload`
 
-#### TODO:
-
-- [ ] Add CRUD layer for DB operations.
-
 ## Highlights
 
 ### Database configuration
